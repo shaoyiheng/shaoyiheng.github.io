@@ -3,277 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>安全密码输入框</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>图片上传管理器</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<style>
-    /* 自定义样式补充 */
-.password-input {
-    outline: none;
-}
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fab fa-github"></i>
+                <span>GitHub上传模拟器</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-link active"><i class="fas fa-upload"></i> 上传</a>
+                <a href="#" class="nav-link"><i class="fas fa-history"></i> 历史</a>
+                <a href="#" class="nav-link"><i class="fas fa-cog"></i> 设置</a>
+            </div>
+        </div>
+    </nav>
 
-.password-input:focus {
-    transform: scale(1.05);
-}
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <div class="upload-container">
+            <!-- 上传区域 -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-content">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h2 class="upload-title">选择图片上传</h2>
+                    <p class="upload-subtitle">支持 JPG、PNG、GIF 格式，单个文件最大 25MB</div>
+                    <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+                    <button class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-folder-open"></i>
+                        选择文件
+                    </button>
+                </div>
+            </div>
 
-.password-input.filled {
-    background-color: #f0f9ff;
-    border-color: #3b82f6;
-}
+            <!-- 文件预览区域 -->
+            <div class="preview-container" id="previewContainer" style="display: none;">
+                <h3 class="preview-title">已选择文件</h3>
+                <div class="preview-grid" id="previewGrid"></div>
+                
+                <!-- 上传设置 -->
+                <div class="upload-settings">
+                    <div class="setting-group">
+                        <label for="targetDir" class="setting-label">
+                            <i class="fas fa-folder"></i>
+                            目标目录
+                        </label>
+                        <input type="text" id="targetDir" class="setting-input" value="images/" placeholder="输入目标目录路径">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="commitMsg" class="setting-label">
+                            <i class="fas fa-comment"></i>
+                            提交信息
+                        </label>
+                        <input type="text" id="commitMsg" class="setting-input" placeholder="输入提交描述">
+                    </div>
 
-#statusMessage.success {
-    color: #10b981;
-    font-weight: 600;
-}
+                    <div class="action-buttons">
+                        <button class="btn-secondary" id="cancelBtn">
+                            <i class="fas fa-times"></i>
+                            取消
+                        </button>
+                        <button class="btn-primary" id="confirmUploadBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            确认上传
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-#statusMessage.error {
-    color: #ef4444;
-    font-weight: 600;
-}
+        <!-- 上传历史 -->
+        <div class="history-container" id="historyContainer">
+            <h3 class="history-title">
+                <i class="fas fa-clock"></i>
+                上传历史
+            </h3>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </main>
 
-/* 动画效果 */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
-
-.shake {
-    animation: shake 0.5s ease-in-out;
-}
-
-/* 响应式设计 */
-@media (max-width: 480px) {
-    .password-input {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-    }
-    
-    .flex.space-x-3 {
-        gap: 8px;
-    }
-}
-
-/* 明密文切换样式 */
-.password-input.visible {
-    -webkit-text-security: none;
-}
-</style>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full">
-
-            <!-- 密码输入框组 -->
-                <input type="text" maxlength="1" class="password-input" data-index="0">
-                <input type="text" maxlength="1" class="password-input" data-index="1">
-                <input type="text" maxlength="1" class="password-input" data-index="2">
-                <input type="text" maxlength="1" class="password-input" data-index="3">
-                <input type="text" maxlength="1" class="password-input" data-index="4">
-                <input type="text" maxlength="1" class="password-input" data-index="5">
+    <!-- 上传进度模态框 -->
+    <div class="modal" id="progressModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>上传进度</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">准备上传...</div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        class PasswordInputManager {
-    constructor() {
-        this.inputs = document.querySelectorAll('.password-input');
-        this.toggleBtn = document.getElementById('toggleVisibility');
-        this.clearBtn = document.getElementById('clearAll');
-        this.submitBtn = document.getElementById('submitBtn');
-        this.statusMessage = document.getElementById('statusMessage');
-        this.isVisible = false;
-        
-        this.init();
-    }
+    <!-- 成功提示 -->
+    <div class="toast success" id="successToast" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>文件上传成功！</span>
+                </div>
+            </div>
 
-    init() {
-        this.setupEventListeners();
-        this.focusFirstInput();
-    }
-
-    setupEventListeners() {
-        // 为每个输入框添加事件监听
-        this.inputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => this.handleInput(e, index));
-            input.addEventListener('keydown', (e) => this.handleKeydown(e, index));
-            input.addEventListener('paste', (e) => this.handlePaste(e));
-            input.addEventListener('focus', () => this.handleFocus(index));
-        });
-
-        // 明密文切换
-        this.toggleBtn.addEventListener('click', () => this.toggleVisibility());
-
-        // 清空按钮
-        this.clearBtn.addEventListener('click', () => this.clearAllInputs());
-
-        // 提交按钮
-        this.submitBtn.addEventListener('click', () => this.handleSubmit());
-    }
-
-    handleInput(event, currentIndex) {
-        const input = event.target;
-        const value = input.value;
-        
-        if (value) {
-            input.classList.add('filled');
-            
-            // 自动跳转到下一个输入框
-            if (currentIndex < this.inputs.length - 1) {
-                this.inputs[currentIndex + 1].focus();
-            }
-        } else {
-            input.classList.remove('filled');
-        }
-        
-        this.updateStatus();
-    }
-
-    handleKeydown(event, currentIndex) {
-        if (event.key === 'Backspace') {
-            if (!event.target.value && currentIndex > 0) {
-                // 如果当前输入框为空，按退格键跳转到上一个输入框
-                this.inputs[currentIndex - 1].focus();
-                this.inputs[currentIndex - 1].value = '';
-                this.inputs[currentIndex - 1].classList.remove('filled');
-            }
-        } else if (event.key === 'ArrowLeft' && currentIndex > 0) {
-            // 左箭头跳转到上一个输入框
-            event.preventDefault();
-            this.inputs[currentIndex - 1].focus();
-        } else if (event.key === 'ArrowRight' && currentIndex < this.inputs.length - 1) {
-            // 右箭头跳转到下一个输入框
-            event.preventDefault();
-            this.inputs[currentIndex + 1].focus();
-        }
-    }
-
-    handlePaste(event) {
-        event.preventDefault();
-        const pasteData = event.clipboardData.getData('text').slice(0, 6);
-        
-        pasteData.split('').forEach((char, index) => {
-            if (index < this.inputs.length) {
-                this.inputs[index].value = char;
-                this.inputs[index].classList.add('filled');
-            this.inputs[index].dispatchEvent(new Event('input'));
-        }
-        });
-    }
-
-    handleFocus(index) {
-        // 高亮当前焦点输入框
-        this.inputs.forEach(input => input.classList.remove('ring-2', 'ring-blue-200'));
-        this.inputs[index].classList.add('ring-2', 'ring-blue-200');
-    }
-
-    toggleVisibility() {
-        this.isVisible = !this.isVisible;
-        
-        this.inputs.forEach(input => {
-            if (this.isVisible) {
-                input.type = 'text';
-                input.classList.add('visible');
-            } else {
-                input.type = 'password';
-                input.classList.remove('visible');
-            }
-        });
-
-        const icon = this.toggleBtn.querySelector('i');
-        const text = this.toggleBtn.querySelector('span');
-        
-        if (this.isVisible) {
-            icon.className = 'fas fa-eye mr-2';
-            text.textContent = '隐藏密码';
-        } else {
-            icon.className = 'fas fa-eye-slash mr-2';
-            text.textContent = '显示密码';
-        }
-    }
-
-    clearAllInputs() {
-        this.inputs.forEach(input => {
-            input.value = '';
-            input.classList.remove('filled');
-        });
-        
-        this.focusFirstInput();
-        this.updateStatus();
-    }
-
-    focusFirstInput() {
-        this.inputs[0].focus();
-    }
-
-    updateStatus() {
-        const filledCount = Array.from(this.inputs).filter(input => input.value).length;
-        
-        if (filledCount === this.inputs.length) {
-            this.statusMessage.textContent = '密码输入完成';
-            this.statusMessage.className = 'text-sm success';
-        } else {
-            this.statusMessage.textContent = `已输入 ${filledCount}/6 位`;
-            this.statusMessage.className = 'text-sm text-gray-500';
-        }
-    }
-
-    handleSubmit() {
-        const password = Array.from(this.inputs).map(input => input.value).join('');
-        
-        if (password.length === 6) {
-            this.statusMessage.textContent = '密码验证成功！';
-            this.statusMessage.className = 'text-sm success';
-            
-            // 添加成功动画
-            this.submitBtn.classList.add('bg-green-500', 'hover:bg-green-600');
-            this.submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            
-            // 模拟验证过程
-            setTimeout(() => {
-                alert('密码验证通过：' + password);
-                this.clearAllInputs();
-                this.submitBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
-                this.submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 1000);
-        } else {
-            this.statusMessage.textContent = '请完整输入6位密码';
-            this.statusMessage.className = 'text-sm error';
-            
-            // 添加错误动画
-            this.inputs.forEach(input => {
-                if (!input.value) {
-                    input.classList.add('shake');
-                    setTimeout(() => input.classList.remove('shake'), 500);
-                }
-            });
-        }
-    }
-
-    // 获取完整密码
-    getPassword() {
-        return Array.from(this.inputs).map(input => input.value).join('');
-    }
-}
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
-    new PasswordInputManager();
-});
-
-// 键盘快捷键支持
-document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey || event.metaKey) {
-        switch(event.key) {
-            case 'c':
-                event.preventDefault();
-                document.getElementById('clearAll').click();
-                break;
-            case 'v':
-                // 已通过粘贴事件处理
-                break;
-        }
-    }
-});
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
