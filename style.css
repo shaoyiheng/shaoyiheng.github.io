@@ -1,0 +1,52 @@
+/* 自定义样式补充 */
+.password-input {
+    outline: none;
+}
+
+.password-input:focus {
+    transform: scale(1.05);
+}
+
+.password-input.filled {
+    background-color: #f0f9ff;
+    border-color: #3b82f6;
+}
+
+#statusMessage.success {
+    color: #10b981;
+    font-weight: 600;
+}
+
+#statusMessage.error {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+/* 动画效果 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+    .password-input {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .flex.space-x-3 {
+        gap: 8px;
+    }
+}
+
+/* 明密文切换样式 */
+.password-input.visible {
+    -webkit-text-security: none;
+}
